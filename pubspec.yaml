@@ -1,0 +1,25 @@
+name: nfc_card_reader
+description: A Flutter plugin for reading EMV contactless payment cards via NFC on Android.
+version: 0.0.1
+homepage: https://github.com/akmaljon1016/nfc_card_reader
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ">=3.3.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  plugin_platform_interface: ^2.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.global_solution.nfc_card_reader
+        pluginClass: NfcCardReaderPlugin
