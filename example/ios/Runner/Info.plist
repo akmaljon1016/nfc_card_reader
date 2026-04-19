@@ -45,5 +45,33 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NFCReaderUsageDescription</key>
+	<string>This app uses NFC to read bank card data</string>
+	<key>com.apple.developer.nfc.readersession.iso7816.select-identifiers</key>
+	<array>
+		<string>325041592E5359532E4444463031</string>
+		<string>A0860001000001</string>
+		<string>A0000000031010</string>
+		<string>A0000000041010</string>
+		<string>A0000000032010</string>
+		<string>A0000000032020</string>
+		<string>A0000000043060</string>
+		<string>A00000002501</string>
+		<string>A0000000250104</string>
+		<string>A0000001523010</string>
+		<string>A0000003330101</string>
+		<string>A0000000651010</string>
+		<string>A0000006581010</string>
+		<string>A0000006581011</string>
+		<string>A0000005241010</string>
+		<string>D860000002</string>
+		<string>D8600000020101</string>
+		<string>D860000003</string>
+		<string>D8600000030101</string>
+		<string>D860000001</string>
+		<string>D8600000010101</string>
+		<string>A0000004320101</string>
+		<string>A0000000040000</string>
+	</array>
 </dict>
 </plist>

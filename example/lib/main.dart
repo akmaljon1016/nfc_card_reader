@@ -190,7 +190,6 @@ class _NfcReaderPageState extends State<NfcReaderPage> {
                 _buildCardDataCard()
               else
                 _buildReadyState(),
-
               const SizedBox(height: 32),
 
               ElevatedButton.icon(

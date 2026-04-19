@@ -3,11 +3,17 @@ package com.global_solution.nfc_card_reader
 import android.nfc.tech.IsoDep
 import android.util.Log
 
-class EmvCardReader(private val isoDep: IsoDep) {
+class EmvCardReader(private val isoDep: IsoDep, private val debugCallback: ((String) -> Unit)? = null) {
 
     private val TAG = "EmvCardReader"
 
+    private fun debug(msg: String) {
+        Log.d(TAG, msg)
+        debugCallback?.invoke(msg)
+    }
+
     private val AIDS = listOf(
+        byteArrayOf(0xA0.toByte(), 0x86.toByte(), 0x00, 0x01, 0x00, 0x00, 0x01), // UzCard
         byteArrayOf(0xA0.toByte(), 0x00, 0x00, 0x00, 0x03, 0x10, 0x10), // Visa
         byteArrayOf(0xA0.toByte(), 0x00, 0x00, 0x00, 0x04, 0x10, 0x10), // Mastercard
         byteArrayOf(0xA0.toByte(), 0x00, 0x00, 0x00, 0x03, 0x20, 0x10), // Visa Debit
@@ -23,27 +29,36 @@ class EmvCardReader(private val isoDep: IsoDep) {
 
         // Try PPSE first
         try {
-            Log.d(TAG, "Trying PPSE")
+            debug("Trying PPSE...")
             val ppseResponse = selectPPSE()
             if (isSuccessResponse(ppseResponse)) {
-                Log.d(TAG, "PPSE selected successfully")
-                val aid = extractAIDFromPPSE(ppseResponse)
-                aid?.let {
-                    Log.d(TAG, "Found AID from PPSE: ${toHex(it)}")
-                    val cardData = tryReadWithAID(it)
-                    if (cardData != null) return cardData
+                debug("PPSE OK")
+                val aids = extractAllAIDsFromPPSE(ppseResponse)
+                debug("PPSE returned ${aids.size} AID(s)")
+                for (aid in aids) {
+                    debug("PPSE AID: ${toHex(aid)}")
+                    val cardData = tryReadWithAID(aid)
+                    if (cardData != null) {
+                        debug("SUCCESS with AID: ${toHex(aid)} ← ADD THIS TO iOS Info.plist")
+                        return cardData
+                    }
                 }
+            } else {
+                debug("PPSE failed: ${toHex(ppseResponse)}")
             }
         } catch (e: Exception) {
-            Log.e(TAG, "PPSE failed", e)
+            debug("PPSE error: ${e.message}")
         }
 
         // Try each known AID
         for (aid in AIDS) {
             try {
-                Log.d(TAG, "Trying AID: ${toHex(aid)}")
+                debug("Trying known AID: ${toHex(aid)}")
                 val cardData = tryReadWithAID(aid)
-                if (cardData != null) return cardData
+                if (cardData != null) {
+                    debug("SUCCESS with known AID: ${toHex(aid)} ← ADD THIS TO iOS Info.plist")
+                    return cardData
+                }
             } catch (e: Exception) {
                 Log.e(TAG, "AID ${toHex(aid)} failed", e)
                 continue
@@ -70,14 +85,15 @@ class EmvCardReader(private val isoDep: IsoDep) {
         return isoDep.transceive(command)
     }
 
-    private fun extractAIDFromPPSE(response: ByteArray): ByteArray? {
+    private fun extractAllAIDsFromPPSE(response: ByteArray): List<ByteArray> {
+        val aids = mutableListOf<ByteArray>()
         val tlvData = parseTLV(response)
         for ((tag, value) in tlvData) {
             if (tag.contentEquals(byteArrayOf(0x4F))) {
-                return value
+                aids.add(value)
             }
         }
-        return null
+        return aids
     }
 
     private fun tryReadWithAID(aid: ByteArray): CardData? {

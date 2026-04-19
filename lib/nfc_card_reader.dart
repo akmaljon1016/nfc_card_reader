@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 /// Card data model
 class CardData {
+
   final String cardNumber;
   final String expirationDate;
   final String? cardholderName;
@@ -49,8 +50,13 @@ class NfcCardReader {
       _cachedStream = _eventChannel
           .receiveBroadcastStream()
           .map((event) {
-        print("------------RAW EVENT: ${event.toString()}----------------");
-        return event as Map;
+        final map = event as Map;
+        if (map['type'] == 'debug') {
+          print("DEBUG: ${map['message']}");
+        } else {
+          print("------------RAW EVENT: ${event.toString()}----------------");
+        }
+        return map;
       })
           .asBroadcastStream(); // Allow multiple listeners
     }

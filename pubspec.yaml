@@ -23,3 +23,5 @@ flutter:
       android:
         package: com.global_solution.nfc_card_reader
         pluginClass: NfcCardReaderPlugin
+      ios:
+        pluginClass: NfcCardReaderPlugin

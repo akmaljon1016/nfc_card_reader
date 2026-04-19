@@ -210,9 +210,10 @@ class NfcCardReaderPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Nfc
             isoDep.connect()
             isoDep.timeout = 5000
             Log.d(TAG, "IsoDep connected successfully")
+            sendDebug("IsoDep connected. Tag ID: $tagId")
 
             Log.d(TAG, "Starting card data read...")
-            val reader = EmvCardReader(isoDep)
+            val reader = EmvCardReader(isoDep) { msg -> sendDebug(msg) }
             val cardData = reader.readCardData()
 
             if (cardData != null) {
@@ -271,6 +272,19 @@ class NfcCardReaderPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Nfc
                 } else {
                     Log.e(TAG, "EventSink is null, cannot send card data to Flutter")
                 }
+            }
+        }
+    }
+
+    private fun sendDebug(message: String) {
+        Log.d(TAG, "DEBUG: $message")
+        val data = mapOf(
+            "type" to "debug",
+            "message" to "[Android-NFC] $message"
+        )
+        activity?.runOnUiThread {
+            synchronized(eventSinkLock) {
+                try { eventSink?.success(data) } catch (_: Exception) {}
             }
         }
     }
